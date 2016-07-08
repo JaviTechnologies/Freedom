@@ -16,12 +16,18 @@ namespace Freedom.Core.Model {
             this.position = position;
             this.ShipType = type;
             this.shipViewHandler = shipView;
-            this.direction = new Vector3 (0,1f,0);
+
+            this.speed = 2f;
+            this.direction = new Vector3 (0,0,1f);
+
+            this.shipViewHandler.Setup (this);
         }
 
         public void Tick(float deltaTime)
         {
             Move (deltaTime);
+
+            this.shipViewHandler.UpdateView (position);
         }
 
         protected virtual void Move(float deltaTime)
