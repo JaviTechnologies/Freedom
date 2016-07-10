@@ -19,13 +19,11 @@ namespace Freedom.Core.Model {
 
             this.speed = 2f;
             this.direction = new Vector3 (0,0,1f);
-
-            this.shipViewHandler.Setup (this);
         }
 
         public void Tick(float deltaTime)
         {
-            Move (deltaTime);
+//            Move (deltaTime);
 
             this.shipViewHandler.UpdateView (position);
         }

@@ -16,6 +16,9 @@ namespace Freedom.Core.View
         public GameObject startDialog;
         public Text levelLabel;
 //        [Space(10)]
+
+        [Header("Level Generator")]
+        public LevelGenerator levelGenerator;
         #endregion
     	
     	void Start ()
@@ -50,6 +53,11 @@ namespace Freedom.Core.View
             IShipView shipView = shipViewFactory.CreateShip (type, levelContainer);
 
             callback (shipView);
+        }
+
+        public void StartLevel ()
+        {
+            levelGenerator.StartLevel ();
         }
         #endregion
 

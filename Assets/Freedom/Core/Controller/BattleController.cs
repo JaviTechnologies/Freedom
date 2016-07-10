@@ -29,7 +29,9 @@ namespace Freedom.Core.Controller
                 ShipFactory.ShipType.A,
                 (IShipView shipView) => {
                     // create player's ship
-                    playerShip = ShipFactory.CreateShip(ShipFactory.ShipType.A, Vector3.zero, shipView);
+                    playerShip = ShipFactory.CreateShip (ShipFactory.ShipType.A, Vector3.zero, shipView);
+
+                    battleViewHandler.StartLevel ();
                 });
         }
 

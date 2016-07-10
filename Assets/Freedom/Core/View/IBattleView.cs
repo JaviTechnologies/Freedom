@@ -5,5 +5,6 @@ namespace Freedom.Core.View {
         void SetBattleStartListener (System.Action listener);
         void ShowStartDialog (ILevelModel level);
         void SpawnShip (ShipFactory.ShipType type, System.Action<IShipView> callback);
+        void StartLevel ();
     }
 }
