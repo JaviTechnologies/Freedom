@@ -5,9 +5,21 @@ namespace Freedom.Core.View
 {
     public class ShipView : MonoBehaviour, IShipView
     {
+        private Transform myTransform;
+
+        private void Awake ()
+        {
+            myTransform = this.transform;
+        }
+
         public void UpdateView (Vector3 position)
         {
-            this.transform.position = position;
+            myTransform.position = position;
+        }
+
+        public Vector3 GetPosition ()
+        {
+            return myTransform.position;
         }
     }
 }

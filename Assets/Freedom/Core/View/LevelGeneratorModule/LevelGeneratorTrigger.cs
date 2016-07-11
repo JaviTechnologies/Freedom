@@ -2,7 +2,7 @@
 using System;
 using System.Collections;
 
-namespace Freedom.Core.View
+namespace Freedom.Core.View.LevelGeneratorModule
 {
     public class LevelGeneratorTrigger : MonoBehaviour
     {

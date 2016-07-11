@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace Freedom.Core.View
+namespace Freedom.Core.View.LevelGeneratorModule
 {
     public class LevelGenerator : MonoBehaviour
     {
@@ -23,7 +23,7 @@ namespace Freedom.Core.View
         private List<Transform> unusedTiles;
         private Vector3 groundPosition;
         private Transform lastTile;
-        private bool shouldGenerate = false;
+        private bool operating = false;
 
         private void OnEnable ()
         {
@@ -39,7 +39,7 @@ namespace Freedom.Core.View
 
         private void Update ()
         {
-            if (shouldGenerate)
+            if (operating)
             {
                 MoveLevel (Time.deltaTime);
             }
@@ -58,16 +58,22 @@ namespace Freedom.Core.View
             groundPosition = groundContainer.localPosition;
             unusedTiles = new List<Transform> ();
 
-            shouldGenerate = true;
+            operating = true;
         }
 
         private void OnGenerationTriggerEventHandler (Transform transform)
         {
+            if (!operating)
+                return;
+            
             StartCoroutine (GenerateNextPiece());
         }
 
         private void OnRecycleTriggerEventHandler (Transform transform)
         {
+            if (!operating)
+                return;
+            
             StartCoroutine (RecyclePiece(transform));
         }
 

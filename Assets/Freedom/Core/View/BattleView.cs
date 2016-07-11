@@ -1,8 +1,10 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections.Generic;
 using Freedom.Core.Controller;
 using Freedom.Core.Model;
-using UnityEngine.UI;
+using Freedom.Core.View.LevelGeneratorModule;
+using Freedom.Core.View.InputModule;
 
 namespace Freedom.Core.View
 {
@@ -20,7 +22,19 @@ namespace Freedom.Core.View
         [Header("Level Generator")]
         public LevelGenerator levelGenerator;
         #endregion
-    	
+
+        private ITickable battleController;
+        private BattleInputAdapter battleInputAdapter;
+
+        private void Awake ()
+        {
+            #if !UNITY_EDITOR && (UNITY_ANDROID || UNITY_IPHONE)
+            battleInputAdapter = this.gameObject.AddComponent<MobileBattleInputAdapter>();
+            #else
+            battleInputAdapter = this.gameObject.AddComponent<PCBattleInputAdapter>();
+            #endif
+        }
+
     	void Start ()
         {
             GameController.Instance.InitBattle (this);
@@ -28,15 +42,32 @@ namespace Freedom.Core.View
     	
     	void Update ()
         {
-    	    
+            battleController.Tick (Time.deltaTime);
     	}
 
         #region IBattleView Implementation
         private System.Action startBattleListener;
+        private System.Action<Vector3> inputEventListener;
+        private System.Action stopInputEventListener;
+
+        public void SetTickableModel (ITickable tickableModel)
+        {
+            battleController = tickableModel;
+        }
 
         public void SetBattleStartListener (System.Action listener)
         {
             startBattleListener = listener;
+        }
+
+        public void SetInputEventListener (System.Action<Vector3> listener)
+        {
+            inputEventListener = listener;
+        }
+
+        public void SetStopInputEventListener (System.Action listener)
+        {
+            stopInputEventListener = listener;
         }
 
         public void ShowStartDialog (ILevelModel level)
@@ -52,12 +83,18 @@ namespace Freedom.Core.View
         {
             IShipView shipView = shipViewFactory.CreateShip (type, levelContainer);
 
+            battleInputAdapter.Setup (shipView);
+
             callback (shipView);
         }
 
         public void StartLevel ()
         {
             levelGenerator.StartLevel ();
+
+            battleInputAdapter.InputEvent = OnInputEvent;
+            battleInputAdapter.StopInputEvent = OnStopInputEvent;
+            battleInputAdapter.StartInput ();
         }
         #endregion
 
@@ -70,6 +107,18 @@ namespace Freedom.Core.View
             // message listeners
             if (startBattleListener != null)
                 startBattleListener ();
+        }
+
+        private void OnInputEvent (Vector3 movementDirection)
+        {
+            if (inputEventListener != null)
+                inputEventListener (movementDirection);
+        }
+
+        private void OnStopInputEvent ()
+        {
+            if (stopInputEventListener != null)
+                stopInputEventListener ();
         }
         #endregion
     }

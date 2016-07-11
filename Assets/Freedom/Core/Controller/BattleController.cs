@@ -4,26 +4,34 @@ using Freedom.Core.View;
 
 namespace Freedom.Core.Controller
 {
-    public class BattleController
+    public class BattleController : ITickable
     {
         private IBattleView battleViewHandler;
         private IShipModel playerShip;
         private ShipFactory shipFactory;
         private ILevelModel currentLevel;
 
-        public BattleController (ILevelModel level, IBattleView battleView) {
+        public BattleController (ILevelModel level, IBattleView battleView)
+        {
             this.currentLevel = level;
             this.battleViewHandler = battleView;
 
+            // setup view
+            battleViewHandler.SetTickableModel(this);
+
             // set listeners
             battleViewHandler.SetBattleStartListener (StartBattle);
+            battleViewHandler.SetInputEventListener (InputEvent);
+            battleViewHandler.SetStopInputEventListener (StopInputEvent);
         }
 
-        public void PrepareBattle () {
+        public void PrepareBattle ()
+        {
             battleViewHandler.ShowStartDialog (currentLevel);
         }
 
-        public void StartBattle () {
+        private void StartBattle ()
+        {
             // spwan player's ship
             battleViewHandler.SpawnShip (
                 ShipFactory.ShipType.A,
@@ -35,8 +43,20 @@ namespace Freedom.Core.Controller
                 });
         }
 
-        public void Tick (float deltaTime) {
-            playerShip.Tick (deltaTime);
+        private void InputEvent (Vector3 movementDirection)
+        {
+            playerShip.SetDirection (movementDirection);
+        }
+
+        private void StopInputEvent ()
+        {
+            playerShip.StopMovement ();
+        }
+
+        public void Tick (float deltaTime)
+        {
+            if (playerShip != null)
+                playerShip.Tick (deltaTime);
         }
     }
 }

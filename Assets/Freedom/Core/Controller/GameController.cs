@@ -42,7 +42,8 @@ namespace Freedom.Core.Controller {
         /// Initializes a new instance of the <see cref="Freedom.Core.Controller.GameController"/> class.
         /// </summary>
         /// <param name="gamer">Gamer.</param>
-        private GameController () {
+        private GameController ()
+        {
             // Create a new gamer
             this.gamer = GamerFactory.CreateGamer();
         }
@@ -52,7 +53,8 @@ namespace Freedom.Core.Controller {
         /// This creates a battle controller using the given battle view.
         /// </summary>
         /// <param name="battleView">Battle view.</param>
-        public void InitBattle (IBattleView battleView) {
+        public void InitBattle (IBattleView battleView)
+        {
             // Create a new battle controller
             battleController = new BattleController (gamer.CurrentLevel, battleView);
 

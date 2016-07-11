@@ -8,6 +8,7 @@ namespace Freedom.Core.Model {
         protected float speed;
         protected Vector3 direction;
         protected IShipView shipViewHandler;
+        protected bool moving;
 
         public ShipFactory.ShipType ShipType { get; private set; }
 
@@ -16,21 +17,35 @@ namespace Freedom.Core.Model {
             this.position = position;
             this.ShipType = type;
             this.shipViewHandler = shipView;
+            this.moving = false;
 
-            this.speed = 2f;
-            this.direction = new Vector3 (0,0,1f);
+            this.speed = 3f;
+            this.direction = new Vector3 (0,0,0);
         }
 
         public void Tick(float deltaTime)
         {
-//            Move (deltaTime);
-
-            this.shipViewHandler.UpdateView (position);
+            if (moving)
+            {
+                Move (deltaTime);
+                this.shipViewHandler.UpdateView (position);
+            }
         }
 
-        protected virtual void Move(float deltaTime)
+        private void Move (float deltaTime)
         {
-            position += (direction.normalized * speed * deltaTime);
+            position += (direction * speed * deltaTime);
+        }
+
+        public void SetDirection (Vector3 direction)
+        {
+            this.direction = direction;
+            moving = true;
+        }
+
+        public void StopMovement ()
+        {
+            moving = false;
         }
     }
 }
