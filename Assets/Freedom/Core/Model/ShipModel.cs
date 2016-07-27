@@ -10,17 +10,37 @@ namespace Freedom.Core.Model {
         protected IShipView shipViewHandler;
         protected bool moving;
 
-        public ShipFactory.ShipType ShipType { get; private set; }
+        private ShipFactory.ShipType shipType;
 
-        public ShipModel(ShipFactory.ShipType type, Vector3 position, IShipView shipView)
+        public ShipModel (ShipFactory.ShipType type, Vector3 position)
         {
             this.position = position;
-            this.ShipType = type;
-            this.shipViewHandler = shipView;
-            this.moving = false;
+            this.shipType = type;
 
-            this.speed = 3f;
-            this.direction = new Vector3 (0,0,0);
+            this.moving = false;
+            this.speed = 2.5f;
+        }
+
+        public ShipModel (ShipFactory.ShipType type, Vector3 position, Vector3 direction) : this(type, position)
+        {
+            SetDirection(direction);
+        }
+
+        public void Setup (IShipView shipView)
+        {
+            this.shipViewHandler = shipView;
+
+            this.shipViewHandler.UpdateView (position);
+        }
+
+        public Vector3 GetPosition ()
+        {
+            return position;
+        }
+
+        public ShipFactory.ShipType GetShipType ()
+        {
+            return this.shipType;
         }
 
         public void Tick(float deltaTime)

@@ -1,11 +1,17 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using Freedom.Core.Model;
+using Freedom.Core.View.Utils;
 
 namespace Freedom.Core.View
 {
     public class ShipViewFactory : MonoBehaviour
     {
+        /// <summary>
+        /// The ship view pool.
+        /// </summary>
+        public ShipViewPool shipViewPool;
+
         /// <summary>
         /// Ship prefab entry.
         /// Helper class to store ship prefab references
@@ -23,36 +29,45 @@ namespace Freedom.Core.View
         public List<ShipPrefabEntry> shipPrefabs = new List<ShipPrefabEntry> ();
 
         /// <summary>
-        /// Creates a ship of the especified type.
+        /// Creates a ship of the specified type at the specified position.
         /// </summary>
         /// <returns>The ship.</returns>
         /// <param name="type">Type.</param>
         /// <param name="parent">Parent.</param>
-        public IShipView CreateShip (ShipFactory.ShipType type, Transform parent)
+        public IShipView CreateShip (ShipFactory.ShipType shipType, Transform parent, Vector3 position)
         {
-            // obtain the prefab by type
-            GameObject prefab = GetPrefab (type);
+            // try to get item from pool
+            IShipView shipView = shipViewPool.GetObject(shipType.ToString());
 
-            // check prefab
-            if (prefab == null)
+            if (shipView == null)
             {
-                UnityEngine.Debug.LogError (string.Format("Prefab not found: {0}", type.ToString()));
-                return null;
-            }
+                Debug.LogError ("Creating NEW!!!");
+                // obtain the prefab by type
+                GameObject prefab = GetPrefab (shipType);
 
-            // create instance
-            Transform shipTransform = GameObject.Instantiate<GameObject>(prefab).GetComponent<Transform>();
+                // check prefab
+                if (prefab == null) {
+                    UnityEngine.Debug.LogError (string.Format ("Prefab not found: {0}", shipType.ToString ()));
+                    return null;
+                }
+
+                // create new ship view instance
+                shipView = GameObject.Instantiate<GameObject> (prefab).GetComponent<ShipView> ();
+            }
+            else
+            {
+                Debug.LogError ("USING POOL!!!");
+            }
+            // get transform
+            Transform shipTransform = ((ShipView)shipView).transform;
 
             // set parent
             shipTransform.SetParent(parent);
 
             // set defaul configuration
-            shipTransform.localPosition = Vector3.zero;
+            shipTransform.position = position;
             shipTransform.localScale = Vector3.one;
             shipTransform.localRotation = Quaternion.identity;
-
-            // get ship view
-            IShipView shipView = shipTransform.GetComponent<IShipView> ();
 
             return shipView;
         }

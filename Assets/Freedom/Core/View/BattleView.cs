@@ -5,6 +5,7 @@ using Freedom.Core.Controller;
 using Freedom.Core.Model;
 using Freedom.Core.View.LevelGeneratorModule;
 using Freedom.Core.View.InputModule;
+using Freedom.Core.View.EnemySpawnModule;
 
 namespace Freedom.Core.View
 {
@@ -21,6 +22,9 @@ namespace Freedom.Core.View
 
         [Header("Level Generator")]
         public LevelGenerator levelGenerator;
+
+        [Header("Enemy Spawner")]
+        public EnemySpawnSpotsView enemySpawnSpotsView;
         #endregion
 
         private ITickable battleController;
@@ -79,9 +83,23 @@ namespace Freedom.Core.View
             levelLabel.text = string.Format ("Level: {0}", level.id.ToString());
         }
 
-        public void SpawnShip (ShipFactory.ShipType type, System.Action<IShipView> callback)
+        public void SpawnGroupOfEnemies (ShipFactory.ShipType shipType, System.Action<IShipView[], Transform[]> callback)
         {
-            IShipView shipView = shipViewFactory.CreateShip (type, levelContainer);
+            Transform[] spawnPoints = enemySpawnSpotsView.GetSpawnPoints ();
+
+            IShipView[] createdShips = new IShipView[spawnPoints.Length];
+            for (int i = 0; i < spawnPoints.Length; i++)
+            {
+                // create enemy ship view
+                createdShips[i] = shipViewFactory.CreateShip (shipType, levelContainer, spawnPoints[i].position);
+            }
+
+            callback (createdShips, spawnPoints);
+        }
+
+        public void SpawnShip (ShipFactory.ShipType shipType, System.Action<IShipView> callback)
+        {
+            IShipView shipView = shipViewFactory.CreateShip (shipType, levelContainer, Vector3.zero);
 
             battleInputAdapter.Setup (shipView);
 

@@ -21,5 +21,11 @@ namespace Freedom.Core.View
         {
             return myTransform.position;
         }
+
+//        void OnDrawGizmos()
+//        {
+//            Gizmos.color = Color.red;
+//            Gizmos.DrawSphere(transform.position - transform.up, 0.1f);
+//        }
     }
 }
