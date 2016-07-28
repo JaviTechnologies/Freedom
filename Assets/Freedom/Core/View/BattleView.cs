@@ -5,7 +5,7 @@ using Freedom.Core.Controller;
 using Freedom.Core.Model;
 using Freedom.Core.View.LevelGeneratorModule;
 using Freedom.Core.View.InputModule;
-using Freedom.Core.View.EnemySpawnModule;
+using Freedom.Core.View.EnemyGeneratorModule;
 
 namespace Freedom.Core.View
 {

@@ -5,7 +5,10 @@ namespace Freedom.Core.View
 {
     public class ShipView : MonoBehaviour, IShipView
     {
+        public ShipFactory.ShipType shipType;
+
         private Transform myTransform;
+        private System.Action recycleListener;
 
         private void Awake ()
         {
@@ -22,10 +25,20 @@ namespace Freedom.Core.View
             return myTransform.position;
         }
 
-//        void OnDrawGizmos()
-//        {
-//            Gizmos.color = Color.red;
-//            Gizmos.DrawSphere(transform.position - transform.up, 0.1f);
-//        }
+        public void SetRecycleListener (System.Action recycleListener)
+        {
+            this.recycleListener = recycleListener;
+        }
+
+        public string ShipType { get { return shipType.ToString (); } }
+
+        public void Recycle ()
+        {
+            if (recycleListener != null)
+                recycleListener ();
+
+            // reset
+            this.recycleListener = null;
+        }
     }
 }

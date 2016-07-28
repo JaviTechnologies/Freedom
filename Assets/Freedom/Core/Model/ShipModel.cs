@@ -4,6 +4,11 @@ using Freedom.Core.View;
 namespace Freedom.Core.Model {
     public class ShipModel : IShipModel
     {
+        public enum ShipState
+        {
+            NONE, ALIVE, DEAD, RECYCLED
+        }
+
         protected Vector3 position;
         protected float speed;
         protected Vector3 direction;
@@ -11,9 +16,16 @@ namespace Freedom.Core.Model {
         protected bool moving;
 
         private ShipFactory.ShipType shipType;
+        public ShipState State { get; private set; }
 
         public ShipModel (ShipFactory.ShipType type, Vector3 position)
         {
+            Init (type, position);
+        }
+
+        public void Init (ShipFactory.ShipType type, Vector3 position)
+        {
+            this.State = ShipState.NONE;
             this.position = position;
             this.shipType = type;
 
@@ -21,14 +33,13 @@ namespace Freedom.Core.Model {
             this.speed = 2.5f;
         }
 
-        public ShipModel (ShipFactory.ShipType type, Vector3 position, Vector3 direction) : this(type, position)
-        {
-            SetDirection(direction);
-        }
-
         public void Setup (IShipView shipView)
         {
             this.shipViewHandler = shipView;
+
+            this.shipViewHandler.SetRecycleListener (OnRecycleEvent);
+
+            this.State = ShipState.ALIVE;
 
             this.shipViewHandler.UpdateView (position);
         }
@@ -45,6 +56,9 @@ namespace Freedom.Core.Model {
 
         public void Tick(float deltaTime)
         {
+            if (State != ShipState.ALIVE)
+                return;
+
             if (moving)
             {
                 Move (deltaTime);
@@ -66,6 +80,12 @@ namespace Freedom.Core.Model {
         public void StopMovement ()
         {
             moving = false;
+        }
+
+        private void OnRecycleEvent ()
+        {
+            this.shipViewHandler = null;
+            this.State = ShipState.RECYCLED;
         }
     }
 }

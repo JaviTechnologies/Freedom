@@ -55,6 +55,7 @@ namespace Freedom.Core.Controller {
         /// <param name="battleView">Battle view.</param>
         public void InitBattle (IBattleView battleView)
         {
+            UnityEngine.Debug.Log ("InitBattle");
             // Create a new battle controller
             battleController = new BattleController (gamer.CurrentLevel, battleView);
 

@@ -1,6 +1,6 @@
 ﻿using Freedom.Core.Model;
 using UnityEngine;
-using Freedom.Core.View.EnemySpawnModule;
+using Freedom.Core.View.EnemyGeneratorModule;
 using System.Collections.Generic;
 
 namespace Freedom.Core.View

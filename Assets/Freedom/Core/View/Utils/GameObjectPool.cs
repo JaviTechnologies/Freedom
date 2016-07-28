@@ -6,29 +6,38 @@ namespace Freedom.Core.View.Utils
 {
     public class GameObjectPool<T> : MonoBehaviour where T : MonoBehaviour
     {
+        /// <summary>
+        /// The pool container.
+        /// </summary>
+        public Transform poolContainer;
+
+        /// <summary>
+        /// The pool dictionary.
+        /// </summary>
         private Dictionary<string,List<T>> poolDictionary;
 
         private void Start ()
         {
             poolDictionary = new Dictionary<string, List<T>> ();
+
+            if (poolContainer == null)
+                poolContainer = transform;
         }
 
+        /// <summary>
+        /// Gets the object of type objectType.
+        /// </summary>
+        /// <returns>The object.</returns>
+        /// <param name="objectType">Object type.</param>
         public T GetObject(string objectType)
         {
             T item = null;
             if (poolDictionary.Count > 0)
             {
-//                if (poolDictionary.ContainsKey (objectType) && poolDictionary [objectType].Count > 0)
+                // Debug pool
+//                foreach (KeyValuePair<string, List<T>> entry in poolDictionary)
 //                {
-//                    // get item from pool
-//                    item = poolDictionary [objectType][poolDictionary [objectType].Count - 1];
-//                    poolDictionary [objectType].RemoveAt (poolDictionary [objectType].Count - 1);
-//
-//                    // activate item
-//                    item.gameObject.SetActive (true);
-//
-//                    // unparent
-//                    item.transform.SetParent (null);
+//                    UnityEngine.Debug.Log (string.Format("ID: {0}, COUNT: {1}", entry.Key, entry.Value.Count));
 //                }
                 List<T> list;
                 if (poolDictionary.TryGetValue (objectType, out list))
@@ -51,13 +60,18 @@ namespace Freedom.Core.View.Utils
             return item;
         }
 
+        /// <summary>
+        /// Pools the object of type objectType.
+        /// </summary>
+        /// <param name="objectType">Object type.</param>
+        /// <param name="item">Item.</param>
         public void PoolObject (string objectType, T item)
         {
             // desactivate item
             item.gameObject.SetActive(false);
 
             // change parent
-            item.transform.SetParent(this.transform);
+            item.transform.SetParent(poolContainer);
 
             // pool item
             if (poolDictionary.ContainsKey (objectType))

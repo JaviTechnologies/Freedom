@@ -5,6 +5,7 @@ TagManager:
   serializedVersion: 2
   tags:
   - LevelTrigger
+  - EnemyShip
   layers:
   - Default
   - TransparentFX

@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using Freedom.Core.Model;
-using Freedom.Core.View.Utils;
+using Freedom.Core.View.EnemyGeneratorModule;
 
 namespace Freedom.Core.View
 {
@@ -41,7 +41,6 @@ namespace Freedom.Core.View
 
             if (shipView == null)
             {
-                Debug.LogError ("Creating NEW!!!");
                 // obtain the prefab by type
                 GameObject prefab = GetPrefab (shipType);
 
@@ -54,10 +53,7 @@ namespace Freedom.Core.View
                 // create new ship view instance
                 shipView = GameObject.Instantiate<GameObject> (prefab).GetComponent<ShipView> ();
             }
-            else
-            {
-                Debug.LogError ("USING POOL!!!");
-            }
+
             // get transform
             Transform shipTransform = ((ShipView)shipView).transform;
 

@@ -16,5 +16,11 @@ namespace Freedom.Core.View
         /// </summary>
         /// <returns>The position.</returns>
         Vector3 GetPosition ();
+
+        /// <summary>
+        /// Sets the recycle listener.
+        /// </summary>
+        /// <param name="recycleListener">Recycle listener.</param>
+        void SetRecycleListener (System.Action recycleListener);
     }
 }
