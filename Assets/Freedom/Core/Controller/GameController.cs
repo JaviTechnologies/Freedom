@@ -4,9 +4,12 @@ using Freedom.Core.Model.Interfaces;
 using Freedom.Core.View;
 using Freedom.Core.View.Interfaces;
 
-namespace Freedom.Core.Controller {
-    public class GameController {
-        private enum State {
+namespace Freedom.Core.Controller
+{
+    public class GameController
+    {
+        private enum State
+        {
             NONE,
             BATTLE
         }
@@ -35,10 +38,16 @@ namespace Freedom.Core.Controller {
         /// <summary>
         /// The gamer.
         /// </summary>
-        private IGamerModel gamer;
+        public IGamerModel Gamer { get; private set; }
 
+        /// <summary>
+        /// The battle controller.
+        /// </summary>
         private BattleController battleController;
 
+        /// <summary>
+        /// The current state of the game.
+        /// </summary>
         private State currentState = State.NONE;
 
         /// <summary>
@@ -48,7 +57,7 @@ namespace Freedom.Core.Controller {
         private GameController ()
         {
             // Create a new gamer
-            this.gamer = GamerFactory.CreateGamer();
+            this.Gamer = GamerFactory.CreateGamer ();
         }
 
         /// <summary>
@@ -60,13 +69,23 @@ namespace Freedom.Core.Controller {
         {
             UnityEngine.Debug.Log ("InitBattle");
             // Create a new battle controller
-            battleController = new BattleController (gamer.CurrentLevel, battleView);
+            battleController = new BattleController (Gamer.CurrentLevel, battleView);
 
             // prepare battle
             battleController.PrepareBattle ();
 
             // Update game state
             currentState = State.BATTLE;
+        }
+
+        /// <summary>
+        /// Saves the game.
+        /// </summary>
+        public void SaveGame ()
+        {
+            if (this.Gamer != null) {
+                this.Gamer.Save ();
+            }
         }
     }
 }

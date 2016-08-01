@@ -120,13 +120,13 @@ namespace Freedom.Core.View
             this.pauseBattleListener = listener;
         }
 
-        public void ShowStartDialog (ILevelModel level)
+        public void ShowStartDialog (IGamerModel gamer)
         {
             // open dialog
             startBattleDialog.gameObject.SetActive (true);
 
             // update info
-            startBattleDialog.Setup(level, OnStartBattleEvent);
+            startBattleDialog.Setup(gamer, OnStartBattleEvent);
         }
 
         public void SpawnGroupOfEnemies (ShipFactory.ShipType shipType, System.Action<IShipView[], Transform[]> callback)
@@ -188,11 +188,11 @@ namespace Freedom.Core.View
             scoreText.text = score.ToString ();
         }
 
-        public void HandleBattlePause (ILevelModel level, int score, int lifes, System.Action continueListener)
+        public void HandleBattlePause (IGamerModel gamer, int score, int lifes, System.Action continueListener)
         {
             Time.timeScale = 0;
             pauseDialog.gameObject.SetActive (true);
-            pauseDialog.Setup (level, score, lifes, continueListener);
+            pauseDialog.Setup (gamer, score, lifes, continueListener);
         }
 
         public void HandleBattleResume ()
@@ -201,13 +201,13 @@ namespace Freedom.Core.View
             Time.timeScale = 1;
         }
 
-        public void HandleGameOver (ILevelModel level, int score, System.Action<int> buyLifesListener)
+        public void HandleGameOver (IGamerModel gamer, int score, System.Action<int> buyLifesListener)
         {
             Time.timeScale = 0;
 
             gameOverDialogView.gameObject.SetActive (true);
 
-            gameOverDialogView.Setup (level, score, buyLifesListener);
+            gameOverDialogView.Setup (gamer, score, buyLifesListener);
         }
 
         public void HandleContinueAfterGameOver ()

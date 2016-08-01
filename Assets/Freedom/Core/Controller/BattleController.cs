@@ -68,7 +68,7 @@ namespace Freedom.Core.Controller
 
         public void PrepareBattle ()
         {
-            battleViewHandler.ShowStartDialog (currentLevel);
+            battleViewHandler.ShowStartDialog (GameController.Instance.Gamer);
         }
 
         private void StartBattle ()
@@ -205,7 +205,16 @@ namespace Freedom.Core.Controller
             battleViewHandler.UpdateLifes (currentLifes);
 
             if (currentLifes == 0) {
-                battleViewHandler.HandleGameOver (currentLevel, currentScore, OnBuyLifes);
+                // save score
+                if (GameController.Instance.Gamer.MaxScore < currentScore) {
+                    GameController.Instance.Gamer.MaxScore = currentScore;
+                }
+
+                // save game
+                GameController.Instance.SaveGame ();
+
+                // game over
+                battleViewHandler.HandleGameOver (GameController.Instance.Gamer, currentScore, OnBuyLifes);
             } else {
                 // respawn player's ship
                 battleViewHandler.SpawnPlayerShip (
@@ -291,7 +300,7 @@ namespace Freedom.Core.Controller
         {
             battleState = BattleState.PAUSED;
 
-            battleViewHandler.HandleBattlePause (currentLevel, currentScore, currentLifes, OnBattleResume);
+            battleViewHandler.HandleBattlePause (GameController.Instance.Gamer, currentScore, currentLifes, OnBattleResume);
         }
 
         private void OnBattleResume ()

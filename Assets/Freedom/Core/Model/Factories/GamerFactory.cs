@@ -16,8 +16,11 @@ namespace Freedom.Core.Model.Factories
         {
             IGamerModel gamer = new GamerModel ();
 
-            // asign first level by default
-            gamer.CurrentLevel = LevelFactory.CreateLevelModel (1);
+            // try to load gamer data
+            if (!gamer.Load ()) {
+                // asign first level by default
+                gamer.CurrentLevel = LevelFactory.CreateLevelModel (1);
+            }
 
             return gamer;
         }
