@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using Freedom.Core.View.Interfaces;
 
 namespace Freedom.Core.View.InputModule
 {

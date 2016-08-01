@@ -1,4 +1,4 @@
-﻿namespace Freedom.Core.Model
+﻿namespace Freedom.Core.Model.Interfaces
 {
     public interface ITickable
     {

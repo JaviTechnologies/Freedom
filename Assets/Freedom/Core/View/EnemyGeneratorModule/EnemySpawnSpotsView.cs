@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using Freedom.Core.Controller.Utils;
 
 namespace Freedom.Core.View.EnemyGeneratorModule
 {
@@ -9,7 +10,7 @@ namespace Freedom.Core.View.EnemyGeneratorModule
 
         public Transform[] GetSpawnPoints ()
         {
-            EnemySpawnGroupView spawnGroup = spwanGroups [Random.Range (0, spwanGroups.Length - 1)];
+            EnemySpawnGroupView spawnGroup = spwanGroups [Random.Range (0, spwanGroups.Length)];
             return spawnGroup.spots;
         }
     }

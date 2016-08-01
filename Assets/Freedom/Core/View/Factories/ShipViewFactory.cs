@@ -1,17 +1,14 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using Freedom.Core.Model;
+using Freedom.Core.Model.Factories;
 using Freedom.Core.View.EnemyGeneratorModule;
+using Freedom.Core.View.Interfaces;
 
-namespace Freedom.Core.View
+namespace Freedom.Core.View.Factories
 {
     public class ShipViewFactory : MonoBehaviour
     {
-        /// <summary>
-        /// The ship view pool.
-        /// </summary>
-        public ShipViewPool shipViewPool;
-
         /// <summary>
         /// Ship prefab entry.
         /// Helper class to store ship prefab references
@@ -36,23 +33,17 @@ namespace Freedom.Core.View
         /// <param name="parent">Parent.</param>
         public IShipView CreateShip (ShipFactory.ShipType shipType, Transform parent, Vector3 position)
         {
-            // try to get item from pool
-            IShipView shipView = shipViewPool.GetObject(shipType.ToString());
+            // obtain the prefab by type
+            GameObject prefab = GetPrefab (shipType);
 
-            if (shipView == null)
-            {
-                // obtain the prefab by type
-                GameObject prefab = GetPrefab (shipType);
-
-                // check prefab
-                if (prefab == null) {
-                    UnityEngine.Debug.LogError (string.Format ("Prefab not found: {0}", shipType.ToString ()));
-                    return null;
-                }
-
-                // create new ship view instance
-                shipView = GameObject.Instantiate<GameObject> (prefab).GetComponent<ShipView> ();
+            // check prefab
+            if (prefab == null) {
+                UnityEngine.Debug.LogError (string.Format ("Prefab not found: {0}", shipType.ToString ()));
+                return null;
             }
+
+            // create new ship view instance
+            IShipView shipView = GameObject.Instantiate<GameObject> (prefab).GetComponent<ShipView> ();
 
             // get transform
             Transform shipTransform = ((ShipView)shipView).transform;

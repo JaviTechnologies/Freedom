@@ -3,28 +3,57 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 using Freedom.Core.Controller;
 using Freedom.Core.Model;
+using Freedom.Core.Model.Factories;
+using Freedom.Core.Model.Interfaces;
 using Freedom.Core.View.LevelGeneratorModule;
 using Freedom.Core.View.InputModule;
 using Freedom.Core.View.EnemyGeneratorModule;
+using Freedom.Core.View.Interfaces;
+using Freedom.Core.View.Factories;
+using Freedom.Core.View.BulletGeneratorModule;
 
 namespace Freedom.Core.View
 {
     public class BattleView : MonoBehaviour, IBattleView
     {
-        #region UI elements
+        /// <summary>
+        /// The ship view factory.
+        /// </summary>
         public ShipViewFactory shipViewFactory;
+
+        /// <summary>
+        /// The ship view pool.
+        /// </summary>
+        public ShipViewPool shipViewPool;
+
+        /// <summary>
+        /// The bullet view factory.
+        /// </summary>
+        public BulletViewFactory bulletViewFactory;
+
+        /// <summary>
+        /// The bullet pool.
+        /// </summary>
+        public BulletViewPool bulletViewPool;
+
+        /// <summary>
+        /// The level container.
+        /// </summary>
         public Transform levelContainer;
 
-        [Header("Start Battle Dialog")]
+        #region UI elements
+
+        [Header ("Start Battle Dialog")]
         public GameObject startDialog;
         public Text levelLabel;
-//        [Space(10)]
+        //        [Space(10)]
 
-        [Header("Level Generator")]
+        [Header ("Level Generator")]
         public LevelGenerator levelGenerator;
 
-        [Header("Enemy Spawner")]
+        [Header ("Enemy Spawner")]
         public EnemySpawnSpotsView enemySpawnSpotsView;
+
         #endregion
 
         private ITickable battleController;
@@ -35,21 +64,22 @@ namespace Freedom.Core.View
             #if !UNITY_EDITOR && (UNITY_ANDROID || UNITY_IPHONE)
             battleInputAdapter = this.gameObject.AddComponent<MobileBattleInputAdapter>();
             #else
-            battleInputAdapter = this.gameObject.AddComponent<PCBattleInputAdapter>();
+            battleInputAdapter = this.gameObject.AddComponent<PCBattleInputAdapter> ();
             #endif
         }
 
-    	void Start ()
+        void Start ()
         {
             GameController.Instance.InitBattle (this);
-    	}
-    	
-    	void Update ()
+        }
+
+        void Update ()
         {
             battleController.Tick (Time.deltaTime);
-    	}
+        }
 
         #region IBattleView Implementation
+
         private System.Action startBattleListener;
         private System.Action<Vector3> inputEventListener;
         private System.Action stopInputEventListener;
@@ -77,10 +107,10 @@ namespace Freedom.Core.View
         public void ShowStartDialog (ILevelModel level)
         {
             // open dialog
-            startDialog.SetActive(true);
+            startDialog.SetActive (true);
 
             // update info
-            levelLabel.text = string.Format ("Level: {0}", level.id.ToString());
+            levelLabel.text = string.Format ("Level: {0}", level.id.ToString ());
         }
 
         public void SpawnGroupOfEnemies (ShipFactory.ShipType shipType, System.Action<IShipView[], Transform[]> callback)
@@ -88,22 +118,37 @@ namespace Freedom.Core.View
             Transform[] spawnPoints = enemySpawnSpotsView.GetSpawnPoints ();
 
             IShipView[] createdShips = new IShipView[spawnPoints.Length];
-            for (int i = 0; i < spawnPoints.Length; i++)
-            {
-                // create enemy ship view
-                createdShips[i] = shipViewFactory.CreateShip (shipType, levelContainer, spawnPoints[i].position);
+            for (int i = 0; i < spawnPoints.Length; i++) {
+                // get ship view
+                createdShips [i] = GetShipView (shipType, spawnPoints [i].position);
+
+                // add listeners
+                createdShips [i].SetDestroyedListener (OnShipDestroyed);
             }
 
             callback (createdShips, spawnPoints);
         }
 
-        public void SpawnShip (ShipFactory.ShipType shipType, System.Action<IShipView> callback)
+        public void SpawnPlayerShip (ShipFactory.ShipType shipType, System.Action<IShipView> callback)
         {
-            IShipView shipView = shipViewFactory.CreateShip (shipType, levelContainer, Vector3.zero);
+            // get ship view
+            IShipView shipView = GetShipView (shipType, Vector3.zero);
 
+            // add listeners
+            shipView.SetDestroyedListener (OnShipDestroyed);
+
+            // configure input adapter in order to controll player's ship
             battleInputAdapter.Setup (shipView);
 
+            // done
             callback (shipView);
+        }
+
+        public void SpawnBullet (BulletFactory.BulletType bulletType, System.Action<IBulletView> callback)
+        {
+            IBulletView bulletView = GetBulletView (bulletType, Vector3.zero);
+
+            callback (bulletView);
         }
 
         public void StartLevel ()
@@ -114,13 +159,51 @@ namespace Freedom.Core.View
             battleInputAdapter.StopInputEvent = OnStopInputEvent;
             battleInputAdapter.StartInput ();
         }
+
         #endregion
 
+        private IShipView GetShipView (ShipFactory.ShipType shipType, Vector3 position)
+        {
+            IShipView shipView = null;
+
+            // Get ship view from the pool
+            ShipView ship = shipViewPool.GetObject (shipType);
+
+            if (ship == null) {
+                // create a new ship view
+                shipView = shipViewFactory.CreateShip (shipType, levelContainer, position);
+            } else {
+                ship.transform.SetParent (levelContainer);
+                shipView = ship;
+            }
+
+            return shipView;
+        }
+
+        private IBulletView GetBulletView (BulletFactory.BulletType bulletType, Vector3 position)
+        {
+            IBulletView bulletView = null;
+
+            // Get bullet view from the pool
+            BulletView bullet = bulletViewPool.GetObject (bulletType);
+
+            if (bullet == null) {
+                // create a new bullet view
+                bulletView = bulletViewFactory.CreateBullet (bulletType, levelContainer, position);
+            } else {
+                bullet.transform.SetParent (levelContainer);
+                bulletView = bullet;
+            }
+
+            return bulletView;
+        }
+
         #region Event Handlers
+
         public void OnStartBattleEvent ()
         {
             // close dialog
-            startDialog.SetActive(false);
+            startDialog.SetActive (false);
 
             // message listeners
             if (startBattleListener != null)
@@ -138,6 +221,13 @@ namespace Freedom.Core.View
             if (stopInputEventListener != null)
                 stopInputEventListener ();
         }
+
+        private void OnShipDestroyed (ShipView shipView)
+        {
+            // pool ship view
+            shipViewPool.PoolObject (shipView.shipType, (ShipView)shipView);
+        }
+
         #endregion
     }
 }

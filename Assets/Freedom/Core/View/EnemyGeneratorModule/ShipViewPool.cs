@@ -1,37 +1,59 @@
 ﻿using UnityEngine;
 using System.Collections;
 using Freedom.Core.View.Utils;
+using System.Collections.Generic;
+using Freedom.Core.Model.Factories;
 
 namespace Freedom.Core.View.EnemyGeneratorModule
 {
-    public class ShipViewPool : GameObjectPool<ShipView>
+    public class ShipViewPool : GameObjectPool<ShipFactory.ShipType,ShipView>
     {
         public const string ENEMY_SHIP_TAG = "EnemyShip";
 
-        public ShipRecycleTrigger ShipRecycleTrigger;
+        public ShipRecycleTrigger shipRecycleTrigger;
+
+        private List<ShipView> shipsToRecycle = new List<ShipView> ();
+        private Coroutine recycleCoroutine;
 
         private void OnEnable ()
         {
-            ShipRecycleTrigger.OnRecycleShipTriggerEvent = OnRecycleTriggerEventHandler;
+            shipRecycleTrigger.OnRecycleShipTriggerEvent = OnRecycleTriggerEventHandler;
         }
 
         private void OnDisable ()
         {
-            ShipRecycleTrigger.OnRecycleShipTriggerEvent = null;
+            shipRecycleTrigger.OnRecycleShipTriggerEvent = null;
         }
 
         private void OnRecycleTriggerEventHandler (ShipView shipView)
         {
-            StartCoroutine (RecycleShip(shipView));
+            shipsToRecycle.Add (shipView);
+
+            if (recycleCoroutine == null) {
+                recycleCoroutine = StartCoroutine (RecycleShips ());
+            }
         }
 
-        private IEnumerator RecycleShip (ShipView shipView)
+        private IEnumerator RecycleShips ()
         {
-            shipView.Recycle ();
+            ShipView shipView;
+            int index = shipsToRecycle.Count - 1;
+            while (shipsToRecycle.Count > 0) {
+                shipView = shipsToRecycle [index];
+                shipsToRecycle.RemoveAt (index);
 
-            this.PoolObject (shipView.ShipType, shipView);
+                yield return 0;
 
-            yield return 0;
+                shipView.Recycle ();
+
+                yield return 0;
+
+                this.PoolObject (shipView.shipType, shipView);
+
+                index = shipsToRecycle.Count - 1;
+            }
+
+            recycleCoroutine = null;
         }
     }
 }

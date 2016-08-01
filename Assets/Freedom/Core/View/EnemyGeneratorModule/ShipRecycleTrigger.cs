@@ -10,7 +10,7 @@ namespace Freedom.Core.View.EnemyGeneratorModule
 
         void OnTriggerEnter (Collider other)
         {
-            if (other.gameObject.tag == ShipViewPool.ENEMY_SHIP_TAG) {
+            if (other.gameObject.CompareTag (ShipViewPool.ENEMY_SHIP_TAG)) {
                 if (OnRecycleShipTriggerEvent != null) {
                     OnRecycleShipTriggerEvent (other.transform.parent.GetComponent<ShipView> ());
                 }

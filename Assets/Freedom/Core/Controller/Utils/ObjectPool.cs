@@ -4,30 +4,35 @@ using System.Collections.Generic;
 
 namespace Freedom.Core.Controller.Utils
 {
-    public class ObjectPool<T>
+    /// <summary>
+    /// Generic object pool.
+    /// </summary>
+    public class ObjectPool<U, V>
     {
         /// <summary>
         /// The pool dictionary.
         /// </summary>
-        private Dictionary<string,List<T>> poolDictionary = new Dictionary<string, List<T>> ();
+        private Dictionary<U,List<V>> poolDictionary = new Dictionary<U, List<V>> ();
 
-        public T GetObject(string objectType)
+        /// <summary>
+        /// Gets the object.
+        /// </summary>
+        /// <returns>The object.</returns>
+        /// <param name="objectType">Object type.</param>
+        public V GetObject(U objectType)
         {
-            T item = default(T);
+            V item = default(V);
             if (poolDictionary.Count > 0)
             {
-                // Debug pool
-//                foreach (KeyValuePair<string, List<T>> entry in poolDictionary)
-//                {
-//                    UnityEngine.Debug.Log (string.Format("CLASSES SHIP MODEL... ID: {0}, COUNT: {1}", entry.Key, entry.Value.Count));
-//                }
-                List<T> list;
+                List<V> list;
                 if (poolDictionary.TryGetValue (objectType, out list))
                 {
                     if (list.Count > 0)
                     {
                         // get item from pool
                         item = list[list.Count - 1];
+
+                        // remove it from pool
                         list.RemoveAt (list.Count - 1);
                     }
                 }
@@ -36,16 +41,22 @@ namespace Freedom.Core.Controller.Utils
             return item;
         }
 
-        public void PoolObject (string objectType, T item)
+        /// <summary>
+        /// Pools the object.
+        /// </summary>
+        /// <param name="objectType">Object type.</param>
+        /// <param name="item">Item.</param>
+        public void PoolObject (U objectType, V item)
         {
-            // pool item
             if (poolDictionary.ContainsKey (objectType))
             {
+                // add item to an existing pool
                 poolDictionary [objectType].Add (item);
             }
             else
             {
-                poolDictionary.Add (objectType, new List<T>(){item});
+                // add item in a new list
+                poolDictionary.Add (objectType, new List<V>(){item});
             }
         }
     }

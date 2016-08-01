@@ -1,7 +1,8 @@
 ﻿using UnityEngine;
 using Freedom.Core.View;
+using Freedom.Core.Model.Interfaces;
 
-namespace Freedom.Core.Model
+namespace Freedom.Core.Model.Factories
 {
     public class ShipFactory
     {
@@ -12,7 +13,7 @@ namespace Freedom.Core.Model
             C
         }
 
-        public static IShipModel CreateShip(ShipType type, Vector3 position)
+        public static IShipModel CreateShip (ShipType type, Vector3 position)
         {
             IShipModel shipModel = new ShipModel (type, position);
 

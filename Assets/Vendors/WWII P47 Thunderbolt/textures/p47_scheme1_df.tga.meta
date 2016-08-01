@@ -30,13 +30,13 @@ TextureImporter:
     filterMode: -1
     aniso: -1
     mipBias: -1
-    wrapMode: -1
+    wrapMode: 0
   nPOTScale: 1
   lightmap: 0
   rGBM: 0
   compressionQuality: 50
   allowsAlphaSplitting: 0
-  spriteMode: 0
+  spriteMode: 1
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -44,12 +44,22 @@ TextureImporter:
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spritePixelsToUnits: 100
   alphaIsTransparency: 0
-  textureType: -1
-  buildTargetSettings: []
+  textureType: 5
+  buildTargetSettings:
+  - buildTarget: Android
+    maxTextureSize: 512
+    textureFormat: 34
+    compressionQuality: 50
+    allowsAlphaSplitting: 0
+  - buildTarget: iPhone
+    maxTextureSize: 512
+    textureFormat: 32
+    compressionQuality: 50
+    allowsAlphaSplitting: 0
   spriteSheet:
     sprites: []
     outline: []
-  spritePackingTag: 
+  spritePackingTag: Planes
   userData: 
   assetBundleName: 
   assetBundleVariant: 

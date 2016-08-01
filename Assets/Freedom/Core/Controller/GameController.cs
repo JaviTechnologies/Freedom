@@ -1,5 +1,8 @@
 ﻿using Freedom.Core.Model;
+using Freedom.Core.Model.Factories;
+using Freedom.Core.Model.Interfaces;
 using Freedom.Core.View;
+using Freedom.Core.View.Interfaces;
 
 namespace Freedom.Core.Controller {
     public class GameController {

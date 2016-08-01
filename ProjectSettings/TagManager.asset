@@ -6,6 +6,7 @@ TagManager:
   tags:
   - LevelTrigger
   - EnemyShip
+  - Bullet
   layers:
   - Default
   - TransparentFX

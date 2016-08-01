@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Freedom.Core.View.Utils
 {
-    public class GameObjectPool<T> : MonoBehaviour where T : MonoBehaviour
+    public class GameObjectPool<U,V> : MonoBehaviour where V : MonoBehaviour
     {
         /// <summary>
         /// The pool container.
@@ -14,11 +14,11 @@ namespace Freedom.Core.View.Utils
         /// <summary>
         /// The pool dictionary.
         /// </summary>
-        private Dictionary<string,List<T>> poolDictionary;
+        private Dictionary<U,List<V>> poolDictionary;
 
         private void Start ()
         {
-            poolDictionary = new Dictionary<string, List<T>> ();
+            poolDictionary = new Dictionary<U, List<V>> ();
 
             if (poolContainer == null)
                 poolContainer = transform;
@@ -29,17 +29,12 @@ namespace Freedom.Core.View.Utils
         /// </summary>
         /// <returns>The object.</returns>
         /// <param name="objectType">Object type.</param>
-        public T GetObject(string objectType)
+        public V GetObject(U objectType)
         {
-            T item = null;
+            V item = null;
             if (poolDictionary.Count > 0)
             {
-                // Debug pool
-//                foreach (KeyValuePair<string, List<T>> entry in poolDictionary)
-//                {
-//                    UnityEngine.Debug.Log (string.Format("ID: {0}, COUNT: {1}", entry.Key, entry.Value.Count));
-//                }
-                List<T> list;
+                List<V> list;
                 if (poolDictionary.TryGetValue (objectType, out list))
                 {
                     if (list.Count > 0)
@@ -65,7 +60,7 @@ namespace Freedom.Core.View.Utils
         /// </summary>
         /// <param name="objectType">Object type.</param>
         /// <param name="item">Item.</param>
-        public void PoolObject (string objectType, T item)
+        public void PoolObject (U objectType, V item)
         {
             // desactivate item
             item.gameObject.SetActive(false);
@@ -80,7 +75,7 @@ namespace Freedom.Core.View.Utils
             }
             else
             {
-                poolDictionary.Add (objectType, new List<T>(){item});
+                poolDictionary.Add (objectType, new List<V>(){item});
             }
         }
     }
