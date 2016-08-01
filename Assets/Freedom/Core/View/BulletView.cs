@@ -10,13 +10,7 @@ namespace Freedom.Core.View
         public BulletFactory.BulletType BulletType;
 
         private System.Action recycleListener;
-
-        public void Setup(float damage)
-        {
-            Damage = damage;
-        }
-
-        public float Damage { get; private set; }
+        private System.Action<BulletView> impactListener;
 
         public void UpdateView (Vector3 position)
         {
@@ -26,6 +20,16 @@ namespace Freedom.Core.View
         public void SetRecycleListener (System.Action recycleListener)
         {
             this.recycleListener = recycleListener;
+        }
+
+        public void SetImpactListener (System.Action<BulletView> impactListener)
+        {
+            this.impactListener = impactListener;
+        }
+
+        private void OnTriggerEnter (Collider other)
+        {
+            impactListener (this);
         }
 
         public void Recycle()

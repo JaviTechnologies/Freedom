@@ -28,7 +28,7 @@ namespace Freedom.Core.View.Interfaces
         /// Sets the bullet impact listener.
         /// </summary>
         /// <param name="bulletImpactListener">Bullet impact listener.</param>
-        void SetBulletImpactListener (System.Action<float> bulletImpactListener);
+        void SetBulletImpactListener (System.Action bulletImpactListener);
 
         /// <summary>
         /// Sets the recycle listener.
@@ -47,5 +47,11 @@ namespace Freedom.Core.View.Interfaces
         /// </summary>
         /// <param name="callback">Callback.</param>
         void Die (System.Action callback);
+
+        /// <summary>
+        /// Handles the invincible mode.
+        /// </summary>
+        /// <param name="duration">Duration.</param>
+        void HandleInvincibleMode (float duration);
     }
 }

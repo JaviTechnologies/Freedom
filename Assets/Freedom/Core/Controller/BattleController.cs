@@ -27,6 +27,12 @@ namespace Freedom.Core.Controller
         private List<IBulletModel> bullets;
         private BattleState battleState;
 
+        private int lifesPerLevel = 3;
+        private int scorePerShipDestroyed = 10;
+
+        private int currentLifes;
+        private int currentScore;
+
         private const string DEFAUL_BULLET_TYPE = "bullet";
 
         public BattleController (ILevelModel level, IBattleView battleView)
@@ -47,6 +53,15 @@ namespace Freedom.Core.Controller
             battleViewHandler.SetBattleStartListener (StartBattle);
             battleViewHandler.SetInputEventListener (InputEvent);
             battleViewHandler.SetStopInputEventListener (StopInputEvent);
+            battleViewHandler.SetPauseBattleListener (OnBattlePaused);
+
+            // current lifes 
+            currentLifes = lifesPerLevel;
+            battleViewHandler.UpdateLifes (currentLifes);
+
+            // current score
+            currentScore = 0;
+            battleViewHandler.UpdateScore (currentScore);
 
             battleState = BattleState.NONE;
         }
@@ -65,9 +80,12 @@ namespace Freedom.Core.Controller
                     // create player's ship
                     playerShip = ShipFactory.CreateShip (ShipFactory.ShipType.A, Vector3.zero);
 
-                    // setup ship
-                    playerShip.SetBulletListener (OnBulletShooted);
+                    // setup ship view
                     playerShip.SetViewHandler (shipView);
+
+                    // setup listeners
+                    playerShip.SetBulletShotListener (OnBulletShooted);
+                    playerShip.SetDestroyedListener (OnPlayerShipDestroyed);
 
                     battleViewHandler.StartLevel ();
 
@@ -170,13 +188,82 @@ namespace Freedom.Core.Controller
                         ship.SetViewHandler (shipViews [i]);
 
                         // bullet listener
-                        ship.SetBulletListener (OnBulletShooted);
+                        ship.SetBulletShotListener (OnBulletShooted);
+                        ship.SetDestroyedListener (OnEnemyShipDestroyed);
 
                         // add enemy ship
                         this.enemyShips.Add (ship);
                     }
                 }
             );
+        }
+
+        private void OnPlayerShipDestroyed (IShipModel ship)
+        {
+            // update current lifes
+            currentLifes--;
+            battleViewHandler.UpdateLifes (currentLifes);
+
+            if (currentLifes == 0) {
+                battleViewHandler.HandleGameOver (currentLevel, currentScore, OnBuyLifes);
+            } else {
+                // respawn player's ship
+                battleViewHandler.SpawnPlayerShip (
+                    ShipFactory.ShipType.A,
+                    (IShipView shipView) => {
+                        // Get Ship from Pool or create one
+                        playerShip = shipModelPool.GetObject (ShipFactory.ShipType.A);
+                        if (playerShip == null) {
+                            playerShip = ShipFactory.CreateShip (ShipFactory.ShipType.A, Vector3.zero);
+                        } else {
+                            playerShip.Setup (ShipFactory.ShipType.A, Vector3.zero);
+                        }
+
+                        // setup ship view
+                        playerShip.SetViewHandler (shipView);
+
+                        // setup listeners
+                        playerShip.SetBulletShotListener (OnBulletShooted);
+                        playerShip.SetDestroyedListener (OnPlayerShipDestroyed);
+                    });
+            }
+        }
+
+        private void OnBuyLifes (int quantity)
+        {
+            // update lifes
+            currentLifes = quantity;
+            battleViewHandler.UpdateLifes (currentLifes);
+
+            // respawn player's ship
+            battleViewHandler.SpawnPlayerShip (
+                ShipFactory.ShipType.A,
+                (IShipView shipView) => {
+                    // Get Ship from Pool or create one
+                    playerShip = shipModelPool.GetObject (ShipFactory.ShipType.A);
+                    if (playerShip == null) {
+                        playerShip = ShipFactory.CreateShip (ShipFactory.ShipType.A, Vector3.zero);
+                    } else {
+                        playerShip.Setup (ShipFactory.ShipType.A, Vector3.zero);
+                    }
+
+                    // setup ship view
+                    playerShip.SetViewHandler (shipView);
+
+                    // setup listeners
+                    playerShip.SetBulletShotListener (OnBulletShooted);
+                    playerShip.SetDestroyedListener (OnPlayerShipDestroyed);
+
+                    // continue
+                    battleViewHandler.HandleContinueAfterGameOver ();
+                });
+        }
+
+        private void OnEnemyShipDestroyed (IShipModel ship)
+        {
+            currentScore += scorePerShipDestroyed;
+
+            battleViewHandler.UpdateScore (currentScore);
         }
 
         private void OnBulletShooted (BulletFactory.BulletType bulletType, Vector3 position, Vector3 direction)
@@ -192,12 +279,26 @@ namespace Freedom.Core.Controller
             battleViewHandler.SpawnBullet (
                 bulletType,
                 (IBulletView bulletView) => {
-                    bullet.SetBulletViewHandler(bulletView);
+                    bullet.SetBulletViewHandler (bulletView);
                 }
             );
 
             // add bullet to active bullets
             bullets.Add (bullet);
+        }
+
+        private void OnBattlePaused ()
+        {
+            battleState = BattleState.PAUSED;
+
+            battleViewHandler.HandleBattlePause (currentLevel, currentScore, currentLifes, OnBattleResume);
+        }
+
+        private void OnBattleResume ()
+        {
+            battleState = BattleState.RUNNING;
+
+            battleViewHandler.HandleBattleResume ();
         }
     }
 }

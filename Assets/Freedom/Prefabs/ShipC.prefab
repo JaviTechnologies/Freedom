@@ -301,6 +301,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   shipType: 2
   model: {fileID: 150350}
+  bulletCollisionListener: {fileID: 11415426}
+  modelRenderer: {fileID: 2364738}
   gun: {fileID: 411516}
 --- !u!1001 &100100000
 Prefab:

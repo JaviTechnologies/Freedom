@@ -24,7 +24,13 @@ namespace Freedom.Core.Model.Interfaces
         /// Sets the bullet listener.
         /// </summary>
         /// <param name="listener">Listener.</param>
-        void SetBulletListener(System.Action<BulletFactory.BulletType, Vector3, Vector3> listener);
+        void SetBulletShotListener(System.Action<BulletFactory.BulletType, Vector3, Vector3> listener);
+
+        /// <summary>
+        /// Sets the destroyed listener.
+        /// </summary>
+        /// <param name="listener">Listener.</param>
+        void SetDestroyedListener (System.Action<IShipModel> listener);
 
         /// <summary>
         /// Gets the ship's state.

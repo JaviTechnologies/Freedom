@@ -11,6 +11,7 @@ using Freedom.Core.View.EnemyGeneratorModule;
 using Freedom.Core.View.Interfaces;
 using Freedom.Core.View.Factories;
 using Freedom.Core.View.BulletGeneratorModule;
+using Freedom.Core.View.Dialogs;
 
 namespace Freedom.Core.View
 {
@@ -43,10 +44,9 @@ namespace Freedom.Core.View
 
         #region UI elements
 
-        [Header ("Start Battle Dialog")]
-        public GameObject startDialog;
-        public Text levelLabel;
-        //        [Space(10)]
+        [Header ("HUD")]
+        public Text scoreText;
+        public Text lifesText;
 
         [Header ("Level Generator")]
         public LevelGenerator levelGenerator;
@@ -54,9 +54,19 @@ namespace Freedom.Core.View
         [Header ("Enemy Spawner")]
         public EnemySpawnSpotsView enemySpawnSpotsView;
 
+        [Header ("Start Battle Dialog")]
+        public StartBattleDialogView startBattleDialog;
+
+        [Header ("Pause Dialog")]
+        public PauseDialogView pauseDialog;
+
+        [Header ("GameOver Dialog")]
+        public GameOverDialogView gameOverDialogView;
+
         #endregion
 
         private ITickable battleController;
+        private ILevelModel currentLevel;
         private BattleInputAdapter battleInputAdapter;
 
         private void Awake ()
@@ -83,6 +93,7 @@ namespace Freedom.Core.View
         private System.Action startBattleListener;
         private System.Action<Vector3> inputEventListener;
         private System.Action stopInputEventListener;
+        private System.Action pauseBattleListener;
 
         public void SetTickableModel (ITickable tickableModel)
         {
@@ -104,13 +115,18 @@ namespace Freedom.Core.View
             stopInputEventListener = listener;
         }
 
+        public void SetPauseBattleListener (System.Action listener)
+        {
+            this.pauseBattleListener = listener;
+        }
+
         public void ShowStartDialog (ILevelModel level)
         {
             // open dialog
-            startDialog.SetActive (true);
+            startBattleDialog.gameObject.SetActive (true);
 
             // update info
-            levelLabel.text = string.Format ("Level: {0}", level.id.ToString ());
+            startBattleDialog.Setup(level, OnStartBattleEvent);
         }
 
         public void SpawnGroupOfEnemies (ShipFactory.ShipType shipType, System.Action<IShipView[], Transform[]> callback)
@@ -148,6 +164,8 @@ namespace Freedom.Core.View
         {
             IBulletView bulletView = GetBulletView (bulletType, Vector3.zero);
 
+            bulletView.SetImpactListener (OnBulletImpacted);
+
             callback (bulletView);
         }
 
@@ -158,6 +176,44 @@ namespace Freedom.Core.View
             battleInputAdapter.InputEvent = OnInputEvent;
             battleInputAdapter.StopInputEvent = OnStopInputEvent;
             battleInputAdapter.StartInput ();
+        }
+
+        public void UpdateLifes (int lifes)
+        {
+            lifesText.text = lifes.ToString ();
+        }
+
+        public void UpdateScore (int score)
+        {
+            scoreText.text = score.ToString ();
+        }
+
+        public void HandleBattlePause (ILevelModel level, int score, int lifes, System.Action continueListener)
+        {
+            Time.timeScale = 0;
+            pauseDialog.gameObject.SetActive (true);
+            pauseDialog.Setup (level, score, lifes, continueListener);
+        }
+
+        public void HandleBattleResume ()
+        {
+            pauseDialog.gameObject.SetActive (false);
+            Time.timeScale = 1;
+        }
+
+        public void HandleGameOver (ILevelModel level, int score, System.Action<int> buyLifesListener)
+        {
+            Time.timeScale = 0;
+
+            gameOverDialogView.gameObject.SetActive (true);
+
+            gameOverDialogView.Setup (level, score, buyLifesListener);
+        }
+
+        public void HandleContinueAfterGameOver ()
+        {
+            gameOverDialogView.gameObject.SetActive (false);
+            Time.timeScale = 1;
         }
 
         #endregion
@@ -203,7 +259,7 @@ namespace Freedom.Core.View
         public void OnStartBattleEvent ()
         {
             // close dialog
-            startDialog.SetActive (false);
+            startBattleDialog.gameObject.SetActive (false);
 
             // message listeners
             if (startBattleListener != null)
@@ -226,6 +282,17 @@ namespace Freedom.Core.View
         {
             // pool ship view
             shipViewPool.PoolObject (shipView.shipType, (ShipView)shipView);
+        }
+
+        private void OnBulletImpacted (BulletView bulletView)
+        {
+            bulletView.Recycle ();
+            bulletViewPool.PoolObject (bulletView.BulletType, bulletView);
+        }
+
+        public void OnPauseButtonPressed ()
+        {
+            pauseBattleListener ();
         }
 
         #endregion

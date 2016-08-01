@@ -3,6 +3,7 @@ using Freedom.Core.Model;
 using Freedom.Core.Model.Factories;
 using Freedom.Core.View.Interfaces;
 using Freedom.Core.View.Utils;
+using System.Collections;
 
 namespace Freedom.Core.View
 {
@@ -10,12 +11,14 @@ namespace Freedom.Core.View
     {
         public ShipFactory.ShipType shipType;
         public GameObject model;
+        public BulletCollisionListener bulletCollisionListener;
+        public Renderer modelRenderer;
         public Transform gun;
 
         public System.Action OnDie;
 
         private Transform myTransform;
-        private System.Action<float> bulletImpactListener;
+        private System.Action bulletImpactListener;
         private System.Action recycleListener;
         private System.Action<ShipView> destroyedListener;
 
@@ -23,7 +26,7 @@ namespace Freedom.Core.View
         {
             myTransform = this.transform;
 
-            (model.GetComponent<BulletCollisionListener> ()).OnCollisionDetected = OnBulletCollision;
+            bulletCollisionListener.OnCollisionDetected = OnBulletCollision;
         }
 
         public void UpdateView (Vector3 position)
@@ -36,7 +39,7 @@ namespace Freedom.Core.View
             return myTransform.position;
         }
 
-        public void SetBulletImpactListener (System.Action<float> bulletImpactListener)
+        public void SetBulletImpactListener (System.Action bulletImpactListener)
         {
             this.bulletImpactListener = bulletImpactListener;
         }
@@ -53,7 +56,7 @@ namespace Freedom.Core.View
 
         public void Die (System.Action callback)
         {
-            // play destruction animation
+            // TODO: play destruction animation
 
             if (destroyedListener != null) {
                 destroyedListener (this);
@@ -74,9 +77,26 @@ namespace Freedom.Core.View
             Reset ();
         }
 
+        public void HandleInvincibleMode (float duration)
+        {
+            StartCoroutine(InvincibleMode(duration));
+        }
+
+        private IEnumerator InvincibleMode (float duration)
+        {
+            float endTime=Time.time + duration;
+
+            while(Time.time<endTime){
+                modelRenderer.enabled = false;
+                yield return new WaitForSeconds(0.2f);
+                modelRenderer.enabled = true;
+                yield return new WaitForSeconds(0.2f);
+            }
+        }
+
         private void OnBulletCollision (BulletView bullet)
         {
-            this.bulletImpactListener (bullet.Damage);
+            this.bulletImpactListener ();
         }
 
         private void Reset ()

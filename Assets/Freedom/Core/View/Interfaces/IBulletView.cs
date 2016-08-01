@@ -6,18 +6,6 @@ namespace Freedom.Core.View.Interfaces
     public interface IBulletView
     {
         /// <summary>
-        /// Setup the bullet.
-        /// </summary>
-        /// <param name="damage">Damage.</param>
-        void Setup(float damage);
-
-        /// <summary>
-        /// Gets the damage.
-        /// </summary>
-        /// <value>The damage.</value>
-        float Damage { get; }
-
-        /// <summary>
         /// Updates the view.
         /// </summary>
         /// <param name="position">Position.</param>
@@ -28,6 +16,12 @@ namespace Freedom.Core.View.Interfaces
         /// </summary>
         /// <param name="recycleListener">Recycle listener.</param>
         void SetRecycleListener (System.Action recycleListener);
+
+        /// <summary>
+        /// Sets the impact listener.
+        /// </summary>
+        /// <param name="impactListener">Impact listener.</param>
+        void SetImpactListener (System.Action<BulletView> impactListener);
     }
 }
 

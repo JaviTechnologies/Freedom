@@ -7,5 +7,7 @@
         /// </summary>
         /// <value>The current level.</value>
         ILevelModel CurrentLevel { get; set; }
+
+        int MaxScore { get; set; }
     }
 }

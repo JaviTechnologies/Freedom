@@ -8,9 +8,10 @@ namespace Freedom.Core.View.Utils
         public System.Action<T> OnCollisionDetected;
         public string objectTag;
 
-        private void OnTriggerEnter (Collider other)
+        void OnTriggerEnter (Collider other)
         {
             if (other.CompareTag (objectTag)) {
+//                UnityEngine.Debug.LogError (string.Format("SHIP: {0}, impacted by BULLET: {1}", transform.parent.name, other.name));
                 if (OnCollisionDetected != null) {
                     OnCollisionDetected (other.GetComponent<T> ());
                 }

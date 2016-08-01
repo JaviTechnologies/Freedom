@@ -12,20 +12,24 @@ namespace Freedom.Core.Model
         {
             NONE,
             ALIVE,
+            INVINCIBLE,
             DEAD,
             RECYCLE
         }
 
-        protected Vector3 position;
-        protected float speed;
-        protected Vector3 direction;
-        protected IShipView shipViewHandler;
-        protected bool moving;
+        private Vector3 position;
+        private float speed;
+        private Vector3 direction;
+        private IShipView shipViewHandler;
+        private bool moving;
+        private float invincibleModeElapsedTime;
+        private float invincibleModeDuration = 3f;
 
         private ShipFactory.ShipType shipType;
         private BulletFactory.BulletType bulletType;
 
-        private System.Action<BulletFactory.BulletType,Vector3,Vector3> bulletShootListener;
+        private System.Action<IShipModel> destroyedListener;
+        private System.Action<BulletFactory.BulletType,Vector3,Vector3> bulletShotListener;
         private Vector3 bulletDirection;
         private float timeToShoot;
         private float shootRate;
@@ -40,8 +44,14 @@ namespace Freedom.Core.Model
 
         public void Tick (float deltaTime)
         {
-            if (State != ShipState.ALIVE)
+            if (State == ShipState.INVINCIBLE) {
+                invincibleModeElapsedTime += deltaTime;
+                if (invincibleModeElapsedTime >= invincibleModeDuration) {
+                    State = ShipState.ALIVE;
+                }
+            } else if (State != ShipState.ALIVE) { // Only tick when it is ALIVE OR INVINCIBLE
                 return;
+            }
 
             if (moving) {
                 Move (deltaTime);
@@ -81,19 +91,34 @@ namespace Freedom.Core.Model
         {
             this.shipViewHandler = shipView;
 
+            // register listeners
             this.shipViewHandler.SetRecycleListener (OnRecycleEvent);
             this.shipViewHandler.SetBulletImpactListener (OnBulletImpact);
 
-            this.State = ShipState.ALIVE;
+            if (shipType == ShipFactory.ShipType.A) {
+                // start player's ship in invincible mode
+                this.State = ShipState.INVINCIBLE;
+                invincibleModeElapsedTime = 0;
+                // handle invincible mode view
+                this.shipViewHandler.HandleInvincibleMode (invincibleModeDuration);
+            } else {
+                // start anemy's ships in normal mode
+                this.State = ShipState.ALIVE;
+            }
 
             this.shipViewHandler.UpdateView (position);
 
             this.shooting = true;
         }
 
-        public void SetBulletListener(System.Action<BulletFactory.BulletType, Vector3, Vector3> listener)
+        public void SetBulletShotListener (System.Action<BulletFactory.BulletType, Vector3, Vector3> listener)
         {
-            bulletShootListener = listener;
+            this.bulletShotListener = listener;
+        }
+
+        public void SetDestroyedListener (System.Action<IShipModel> listener)
+        {
+            this.destroyedListener = listener;
         }
 
         public ShipState State { get; private set; }
@@ -135,15 +160,19 @@ namespace Freedom.Core.Model
                 timeToShoot += shootRate;
 
                 // shoot
-                if (bulletShootListener != null)
-                    bulletShootListener (bulletType, this.shipViewHandler.GunPosition, bulletDirection);
+                if (bulletShotListener != null)
+                    bulletShotListener (bulletType, this.shipViewHandler.GunPosition, bulletDirection);
             }
         }
 
-        private void OnBulletImpact (float damage)
+        private void OnBulletImpact ()
         {
             if (State == ShipState.ALIVE) {
                 this.State = ShipState.DEAD;
+
+                if (this.destroyedListener != null) {
+                    this.destroyedListener (this);
+                }
 
                 this.shipViewHandler.Die (
                     () => {
@@ -157,6 +186,8 @@ namespace Freedom.Core.Model
         private void OnRecycleEvent ()
         {
             this.shipViewHandler = null;
+            bulletShotListener = null;
+            destroyedListener = null;
             this.State = ShipState.RECYCLE;
         }
     }
